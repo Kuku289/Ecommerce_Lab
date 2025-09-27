@@ -87,7 +87,12 @@ CREATE TABLE `orderdetails` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
-
+CREATE TABLE categories (
+    cat_id INT AUTO_INCREMENT PRIMARY KEY,
+    cat_name VARCHAR(100) NOT NULL,
+    user_id INT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 --
 -- Table structure for table `orders`
 --

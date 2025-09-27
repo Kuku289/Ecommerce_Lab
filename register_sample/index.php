@@ -1,3 +1,6 @@
+<?php
+require_once 'settings/core.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,14 +27,41 @@
 
 	<div class="menu-tray">
 		<span class="me-2">Menu:</span>
-		<a href="login/register.php" class="btn btn-sm btn-outline-primary">Register</a>
-		<a href="login/login.php" class="btn btn-sm btn-outline-secondary">Login</a>
+		
+		<?php if (!check_login()): ?>
+			<!-- Not logged in - Show Register/Login -->
+			<a href="login/register.php" class="btn btn-sm btn-outline-primary">Register</a>
+			<a href="login/login.php" class="btn btn-sm btn-outline-secondary">Login</a>
+		
+		<?php elseif (check_admin()): ?>
+			<!-- Logged in as Admin - Show Logout/Category -->
+			<a href="admin/category.php" class="btn btn-sm btn-outline-success">Category</a>
+			<a href="login/logout.php" class="btn btn-sm btn-outline-danger">Logout</a>
+		
+		<?php else: ?>
+			<!-- Logged in as Customer - Show Logout only -->
+			<a href="login/logout.php" class="btn btn-sm btn-outline-danger">Logout</a>
+		
+		<?php endif; ?>
 	</div>
 
 	<div class="container" style="padding-top:120px;">
 		<div class="text-center">
-			<h1>Welcome</h1>
-			<p class="text-muted">Use the menu in the top-right to Register or Login.</p>
+			<?php if (!check_login()): ?>
+				<h1>Welcome</h1>
+				<p class="text-muted">Use the menu in the top-right to Register or Login.</p>
+			
+			<?php elseif (check_admin()): ?>
+				<h1>Welcome, <?php echo get_user_name(); ?>!</h1>
+				<p class="text-muted">You are logged in as an Administrator.</p>
+				<p>Use the menu in the top-right to manage categories or logout.</p>
+			
+			<?php else: ?>
+				<h1>Welcome, <?php echo get_user_name(); ?>!</h1>
+				<p class="text-muted">You are logged in as a Customer.</p>
+				<p>Use the menu in the top-right to logout.</p>
+			
+			<?php endif; ?>
 		</div>
 	</div>
 
