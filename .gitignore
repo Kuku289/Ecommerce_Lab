@@ -1,0 +1,8 @@
+.DS_Store
+*.log
+.env
+settings/db_cred.php
+vendor/
+node_modules/
+.idea/
+.vscode/
