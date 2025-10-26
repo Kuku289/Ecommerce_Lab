@@ -2,10 +2,10 @@
 require_once 'settings/core.php';
 require_once 'settings/db_class.php';
 
-// Get categories from database
 $db = new db_connection();
 $db->db_connect();
 
+// Fetch categories
 $categories = [];
 $categories_result = $db->db->query("SELECT * FROM categories LIMIT 6");
 if ($categories_result) {
@@ -13,6 +13,11 @@ if ($categories_result) {
         $categories[] = $row;
     }
 }
+
+// Check user authentication and role
+$is_logged_in = check_login();
+$is_admin = $is_logged_in ? check_admin() : false;
+$user_name = $is_logged_in ? get_user_name() : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -26,15 +31,11 @@ if ($categories_result) {
         :root {
             --primary: #4CAF50;
             --secondary: #FF9800;
-            --accent: #3F51B5;
         }
-
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow-x: hidden;
         }
-
-        /* Background Image */
         .page-background {
             position: fixed;
             top: 0;
@@ -45,57 +46,40 @@ if ($categories_result) {
             z-index: -1;
             opacity: 0.3;
         }
-
-        /* Navigation */
         .navbar {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-
         .navbar-brand {
             color: var(--primary) !important;
             font-weight: bold;
             font-size: 1.5rem;
         }
-
-        /* Hero Section */
         .hero-section {
             background: linear-gradient(135deg, rgba(76, 175, 80, 0.9), rgba(255, 152, 0, 0.8));
             color: white;
             padding: 100px 0 80px;
             text-align: center;
         }
-
         .hero-section h1 {
             font-size: 3.5rem;
             font-weight: bold;
             margin-bottom: 1rem;
         }
-
-        .hero-section p {
-            font-size: 1.3rem;
-            margin-bottom: 2rem;
-        }
-
-        /* Value Props */
         .value-card {
             text-align: center;
             padding: 2rem;
             transition: transform 0.3s;
         }
-
         .value-card:hover {
             transform: translateY(-10px);
         }
-
         .value-card i {
             font-size: 3rem;
             color: var(--primary);
             margin-bottom: 1rem;
         }
-
-        /* Category Cards */
         .category-card {
             background: white;
             border-radius: 15px;
@@ -105,28 +89,15 @@ if ($categories_result) {
             transition: all 0.3s;
             height: 100%;
         }
-
         .category-card:hover {
             transform: translateY(-10px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
-
-        .category-icon {
+        .category-card i {
             font-size: 3rem;
             color: var(--primary);
             margin-bottom: 1rem;
         }
-
-        .category-card img {
-            width: 100%;
-            max-width: 200px;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 10px;
-            margin-bottom: 1rem;
-        }
-
-        /* Wellness Tips */
         .wellness-tip {
             background: white;
             border-left: 4px solid var(--primary);
@@ -135,54 +106,20 @@ if ($categories_result) {
             margin-bottom: 1rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-
-        /* Buttons */
-        .btn-primary-custom {
-            background: var(--primary);
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .btn-primary-custom:hover {
-            background: #45a049;
-            transform: scale(1.05);
-        }
-
-        .btn-outline-custom {
-            border: 2px solid white;
-            color: white;
-            padding: 12px 30px;
-            border-radius: 25px;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .btn-outline-custom:hover {
-            background: white;
-            color: var(--primary);
-        }
-
-        /* Footer */
         footer {
             background: #2d3748;
             color: white;
             padding: 3rem 0;
         }
-
         section {
             padding: 60px 0;
         }
-
         .section-title {
             font-size: 2.5rem;
             font-weight: bold;
             margin-bottom: 1rem;
             color: #2d3748;
         }
-
         .stats-box {
             background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
@@ -190,7 +127,6 @@ if ($categories_result) {
             border-radius: 15px;
             text-align: center;
         }
-
         .stats-number {
             font-size: 3rem;
             font-weight: bold;
@@ -198,13 +134,11 @@ if ($categories_result) {
     </style>
 </head>
 <body>
-    <!-- Background Image -->
     <div class="page-background"></div>
 
-    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="#"><i class="fas fa-leaf"></i> BotaniQs</a>
+            <a class="navbar-brand" href="index.php"><i class="fas fa-leaf"></i> BotaniQs</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -215,24 +149,30 @@ if ($categories_result) {
                     <li class="nav-item"><a class="nav-link" href="#wellness">Wellness</a></li>
                     <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
                     
-                    <?php if (!check_login()): ?>
+                    <?php if (!$is_logged_in): ?>
                         <li class="nav-item"><a class="nav-link" href="login/login.php">Login</a></li>
                         <li class="nav-item">
                             <a class="btn btn-success btn-sm ms-2" href="login/register.php">Register</a>
                         </li>
-                    <?php elseif (check_admin()): ?>
+                    <?php elseif ($is_admin): ?>
                         <li class="nav-item">
-                            <span class="nav-link">Welcome, <?php echo get_user_name(); ?></span>
+                            <span class="nav-link">Welcome, <?php echo htmlspecialchars($user_name); ?></span>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-success btn-sm ms-2" href="admin/categories.php">Dashboard</a>
+                            <a class="btn btn-success btn-sm ms-2" href="admin/categories.php">Categories</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-info btn-sm ms-2" href="admin/brand.php">Brands</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-warning btn-sm ms-2" href="admin/product.php">Add Product</a>
                         </li>
                         <li class="nav-item">
                             <a class="btn btn-outline-danger btn-sm ms-2" href="login/logout.php">Logout</a>
                         </li>
                     <?php else: ?>
                         <li class="nav-item">
-                            <span class="nav-link">Welcome, <?php echo get_user_name(); ?></span>
+                            <span class="nav-link">Welcome, <?php echo htmlspecialchars($user_name); ?></span>
                         </li>
                         <li class="nav-item">
                             <a class="btn btn-outline-danger btn-sm ms-2" href="login/logout.php">Logout</a>
@@ -243,21 +183,19 @@ if ($categories_result) {
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section id="home" class="hero-section">
         <div class="container">
             <h1>Authentic Wellness, Made Accessible</h1>
             <p>Premium organic seeds, essential oils, and herbs for Ghana's wellness journey</p>
             <div class="d-flex gap-3 justify-content-center">
-                <a href="#categories" class="btn btn-light btn-primary-custom">Explore Products</a>
-                <?php if (!check_login()): ?>
-                    <a href="login/register.php" class="btn btn-outline-custom">Get Started</a>
+                <a href="#categories" class="btn btn-light btn-lg">Explore Products</a>
+                <?php if (!$is_logged_in): ?>
+                    <a href="login/register.php" class="btn btn-outline-light btn-lg">Get Started</a>
                 <?php endif; ?>
             </div>
         </div>
     </section>
 
-    <!-- Value Propositions -->
     <section class="bg-light">
         <div class="container">
             <h2 class="section-title text-center mb-5">Why Choose BotaniQs?</h2>
@@ -287,14 +225,13 @@ if ($categories_result) {
                     <div class="value-card">
                         <i class="fas fa-book-open"></i>
                         <h4>Education</h4>
-                        <p>Learn proper usage & benefits</p>
+                        <p>Learn proper usage and benefits</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Categories Section -->
     <section id="categories">
         <div class="container">
             <h2 class="section-title text-center">Shop by Category</h2>
@@ -305,37 +242,26 @@ if ($categories_result) {
                     <?php foreach ($categories as $category): ?>
                         <div class="col-md-4">
                             <div class="category-card">
-                                <i class="fas fa-spa category-icon"></i>
+                                <i class="fas fa-spa"></i>
                                 <h3><?php echo htmlspecialchars($category['cat_name']); ?></h3>
                                 <p class="text-muted">Explore our premium collection</p>
-                                <a href="#" class="btn btn-success">View Products</a>
+                                <?php if ($is_logged_in): ?>
+                                    <a href="view/product.php?cat_id=<?php echo $category['cat_id']; ?>" class="btn btn-success">View Products</a>
+                                <?php else: ?>
+                                    <a href="login/register.php" class="btn btn-success">Register to View</a>
+                                <?php endif; ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <!-- Default Categories -->
-                    <div class="col-md-4">
-                        <div class="category-card">
-                            <img src="S2.jpg" alt="Organic Seeds">
-                            <h3>Organic Seeds</h3>
-                            <p class="text-muted">Chia, flax, pumpkin & more</p>
-                            <a href="login/register.php" class="btn btn-success">Shop Now</a>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="category-card">
-                            <img src="B2.jpg" alt="Essential Oils">
-                            <h3>Essential Oils</h3>
-                            <p class="text-muted">Pure therapeutic oils</p>
-                            <a href="login/register.php" class="btn btn-success">Shop Now</a>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="category-card">
-                            <img src="H1.jpg" alt="Medicinal Herbs">
-                            <h3>Medicinal Herbs</h3>
-                            <p class="text-muted">Traditional remedies</p>
-                            <a href="login/register.php" class="btn btn-success">Shop Now</a>
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            <i class="fas fa-info-circle"></i> No categories available yet. 
+                            <?php if ($is_admin): ?>
+                                <a href="admin/categories.php" class="alert-link">Add categories</a> to get started.
+                            <?php else: ?>
+                                Please check back later!
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endif; ?>
@@ -343,10 +269,9 @@ if ($categories_result) {
         </div>
     </section>
 
-    <!-- Wellness Tips -->
     <section id="wellness" class="bg-light">
         <div class="container">
-            <h2 class="section-title text-center mb-5">Wellness Tips & Education</h2>
+            <h2 class="section-title text-center mb-5">Wellness Tips and Education</h2>
             <div class="row">
                 <div class="col-md-6">
                     <div class="wellness-tip">
@@ -376,7 +301,6 @@ if ($categories_result) {
         </div>
     </section>
 
-    <!-- About/Impact Section -->
     <section id="about">
         <div class="container">
             <div class="row align-items-center">
@@ -416,7 +340,6 @@ if ($categories_result) {
         </div>
     </section>
 
-    <!-- Footer -->
     <footer>
         <div class="container">
             <div class="row">
@@ -436,4 +359,16 @@ if ($categories_result) {
                 <div class="col-md-4">
                     <h5>Contact Us</h5>
                     <p><i class="fas fa-envelope"></i> botaniqs@gmail.com</p>
-                    <p><i class="fas fa-phone"></i> +233 20
+                    <p><i class="fas fa-phone"></i> +233 20 409 3497</p>
+                    <p><i class="fas fa-phone"></i> +233 59 573 4449</p>
+                </div>
+            </div>
+            <div class="text-center mt-4 pt-4 border-top border-secondary">
+                <p>&copy; 2025 BotaniQs Enhanced. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
