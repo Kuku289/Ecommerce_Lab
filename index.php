@@ -40,7 +40,7 @@ $user_name = $is_logged_in ? get_user_name() : '';
             left: 0;
             width: 100%;
             height: 100%;
-            background: url('W7.jpg') center/cover no-repeat;
+            background: url('W4.jpg') center/cover no-repeat;
             z-index: -1;
             opacity: 0.3;
         }
@@ -164,6 +164,9 @@ $user_name = $is_logged_in ? get_user_name() : '';
                         </li>
                         <li class="nav-item">
                             <a class="btn btn-info btn-sm ms-2" href="admin/brand.php">Brands</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="btn btn-warning btn-sm ms-2" href="admin/product.php">Products</a>
                         </li>
                         <li class="nav-item">
                             <a class="btn btn-outline-danger btn-sm ms-2" href="login/logout.php">Logout</a>
