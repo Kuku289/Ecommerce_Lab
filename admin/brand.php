@@ -64,7 +64,7 @@ $categories = get_categories_by_user_ctr($user_id);
                         <a href="../index.php" class="btn btn-secondary me-2">
                             <i class="fas fa-home"></i> Home
                         </a>
-                        <a href="categories.php" class="btn btn-info me-2">
+                        <a href="category.php" class="btn btn-info me-2">
                             <i class="fas fa-tags"></i> Categories
                         </a>
                         <a href="../login/logout.php" class="btn btn-danger">
