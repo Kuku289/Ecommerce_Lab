@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once(dirname(__FILE__) . '../controllers/product_controller.php');
+require_once(dirname(__FILE__) . '/../controllers/product_controller.php');
 
 header('Content-Type: application/json');
 

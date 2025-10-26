@@ -13,9 +13,9 @@ if (!check_admin()) {
 }
 
 // Include necessary files
-require_once(dirname(__FILE__) . '../controllers/product_controller.php');
-require_once(dirname(__FILE__) . '../controllers/category_controller.php');
-require_once(dirname(__FILE__) . '../controllers/brand_controller.php');
+require_once(dirname(__FILE__) . '/../controllers/product_controller.php');
+require_once(dirname(__FILE__) . '/../controllers/category_controller.php');
+require_once(dirname(__FILE__) . '/../controllers/brand_controller.php');
 
 // Fetch categories for dropdown
 try {

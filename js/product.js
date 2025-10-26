@@ -104,7 +104,7 @@ function updateProduct(event) {
             // Reload products
             setTimeout(() => {
                 loadProducts();
-                closeModal();
+                resetForm();
             }, 1500);
         } else {
             showMessage(data.message, 'error');
@@ -113,6 +113,37 @@ function updateProduct(event) {
     .catch(error => {
         console.error('Error:', error);
         showMessage('An error occurred while updating the product', 'error');
+    });
+}
+
+// Delete product
+function deleteProduct(productId) {
+    if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('product_id', productId);
+
+    fetch('../actions/delete_product_action.php', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showMessage(data.message, 'success');
+            // Reload products
+            setTimeout(() => {
+                loadProducts();
+            }, 1500);
+        } else {
+            showMessage(data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showMessage('An error occurred while deleting the product', 'error');
     });
 }
 
@@ -170,7 +201,7 @@ function uploadProductImage(productId) {
 function displayImagePreview(imagePath) {
     const preview = document.getElementById('imagePreview');
     if (preview) {
-        preview.innerHTML = `<img src="../${imagePath}" alt="Product Image" style="max-width: 200px; max-height: 200px;">`;
+        preview.innerHTML = `<img src="../${imagePath}" alt="Product Image" style="max-width: 200px; max-height: 200px; margin-top: 10px; border-radius: 5px; border: 2px solid #dee2e6;">`;
     }
 }
 
@@ -200,7 +231,7 @@ function displayProducts(products) {
     tbody.innerHTML = '';
 
     if (products.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No products found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center">No products found</td></tr>';
         return;
     }
 
@@ -211,14 +242,19 @@ function displayProducts(products) {
             <td>${product.cat_name || 'N/A'}</td>
             <td>${product.brand_name || 'N/A'}</td>
             <td>${product.product_title}</td>
-            <td>$${parseFloat(product.product_price).toFixed(2)}</td>
+            <td>GH₵${parseFloat(product.product_price).toFixed(2)}</td>
             <td>
                 ${product.product_image ? 
-                    `<img src="../${product.product_image}" alt="${product.product_title}" style="max-width: 50px; max-height: 50px;">` : 
+                    `<img src="../${product.product_image}" alt="${product.product_title}" class="product-image">` : 
                     'No image'}
             </td>
             <td>
-                <button class="btn btn-sm btn-primary" onclick="editProduct(${product.product_id})">Edit</button>
+                <button class="btn btn-sm btn-primary" onclick="editProduct(${product.product_id})" title="Edit">
+                    <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="deleteProduct(${product.product_id})" title="Delete">
+                    <i class="fas fa-trash"></i>
+                </button>
             </td>
         `;
         tbody.appendChild(row);
@@ -263,35 +299,52 @@ function populateEditForm(product) {
     form.onsubmit = updateProduct;
     
     // Change button text
-    const submitBtn = document.querySelector('#productForm button[type="submit"]');
+    const submitBtn = document.getElementById('submitBtn');
     if (submitBtn) {
-        submitBtn.textContent = 'Update Product';
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Update Product';
     }
     
-    // Show modal or scroll to form
-    showEditModal();
+    // Change form title
+    const formTitle = document.getElementById('formTitle');
+    if (formTitle) {
+        formTitle.textContent = 'Edit Product';
+    }
+    
+    // Scroll to form
+    document.getElementById('productForm').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Reset form
+function resetForm() {
+    document.getElementById('productForm').reset();
+    document.getElementById('product_id').value = '';
+    document.getElementById('product_image').value = '';
+    document.getElementById('imagePreview').innerHTML = '';
+    
+    // Reset form to add mode
+    document.getElementById('productForm').onsubmit = addProduct;
+    
+    const submitBtn = document.getElementById('submitBtn');
+    if (submitBtn) {
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Add Product';
+    }
+    
+    const formTitle = document.getElementById('formTitle');
+    if (formTitle) {
+        formTitle.textContent = 'Add New Product';
+    }
 }
 
 // Show message modal/popup
 function showMessage(message, type) {
-    // You can customize this based on your UI framework
-    // This is a simple alert implementation
-    if (type === 'success') {
-        alert('✓ ' + message);
-    } else {
-        alert('✗ ' + message);
+    // Check if showMessage is defined elsewhere (in the HTML), if not use alert
+    if (typeof window.showMessage === 'undefined') {
+        if (type === 'success') {
+            alert('✓ ' + message);
+        } else {
+            alert('✗ ' + message);
+        }
     }
-}
-
-// Helper functions for modal (implement based on your UI)
-function showEditModal() {
-    // Implement based on your modal system
-    // For example, if using Bootstrap:
-    // $('#editModal').modal('show');
-}
-
-function closeModal() {
-    // Implement based on your modal system
 }
 
 // Load products on page load

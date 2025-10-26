@@ -160,7 +160,7 @@ $user_name = $is_logged_in ? get_user_name() : '';
                             <span class="nav-link">Welcome, <?php echo htmlspecialchars($user_name); ?></span>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-success btn-sm ms-2" href="admin/categories.php">Categories</a>
+                            <a class="btn btn-success btn-sm ms-2" href="admin/category.php">Categories</a>
                         </li>
                         <li class="nav-item">
                             <a class="btn btn-info btn-sm ms-2" href="admin/brand.php">Brands</a>
