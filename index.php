@@ -5,7 +5,6 @@ require_once 'settings/db_class.php';
 $db = new db_connection();
 $db->db_connect();
 
-// Fetch categories
 $categories = [];
 $categories_result = $db->db->query("SELECT * FROM categories LIMIT 6");
 if ($categories_result) {
@@ -14,7 +13,6 @@ if ($categories_result) {
     }
 }
 
-// Check user authentication and role
 $is_logged_in = check_login();
 $is_admin = $is_logged_in ? check_admin() : false;
 $user_name = $is_logged_in ? get_user_name() : '';
@@ -93,9 +91,12 @@ $user_name = $is_logged_in ? get_user_name() : '';
             transform: translateY(-10px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
-        .category-card i {
-            font-size: 3rem;
-            color: var(--primary);
+        .category-card img {
+            width: 100%;
+            max-width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
             margin-bottom: 1rem;
         }
         .wellness-tip {
@@ -138,7 +139,7 @@ $user_name = $is_logged_in ? get_user_name() : '';
 
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="index.php"><i class="fas fa-leaf"></i> BotaniQs</a>
+            <a class="navbar-brand" href="#"><i class="fas fa-leaf"></i> BotaniQs</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -163,9 +164,6 @@ $user_name = $is_logged_in ? get_user_name() : '';
                         </li>
                         <li class="nav-item">
                             <a class="btn btn-info btn-sm ms-2" href="admin/brand.php">Brands</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="btn btn-warning btn-sm ms-2" href="admin/product.php">Add Product</a>
                         </li>
                         <li class="nav-item">
                             <a class="btn btn-outline-danger btn-sm ms-2" href="login/logout.php">Logout</a>
@@ -242,26 +240,36 @@ $user_name = $is_logged_in ? get_user_name() : '';
                     <?php foreach ($categories as $category): ?>
                         <div class="col-md-4">
                             <div class="category-card">
-                                <i class="fas fa-spa"></i>
+                                <i class="fas fa-spa" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
                                 <h3><?php echo htmlspecialchars($category['cat_name']); ?></h3>
                                 <p class="text-muted">Explore our premium collection</p>
-                                <?php if ($is_logged_in): ?>
-                                    <a href="view/product.php?cat_id=<?php echo $category['cat_id']; ?>" class="btn btn-success">View Products</a>
-                                <?php else: ?>
-                                    <a href="login/register.php" class="btn btn-success">Register to View</a>
-                                <?php endif; ?>
+                                <a href="#" class="btn btn-success">View Products</a>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
-                    <div class="col-12">
-                        <div class="alert alert-info text-center">
-                            <i class="fas fa-info-circle"></i> No categories available yet. 
-                            <?php if ($is_admin): ?>
-                                <a href="admin/categories.php" class="alert-link">Add categories</a> to get started.
-                            <?php else: ?>
-                                Please check back later!
-                            <?php endif; ?>
+                    <div class="col-md-4">
+                        <div class="category-card">
+                            <img src="S2.jpg" alt="Organic Seeds">
+                            <h3>Organic Seeds</h3>
+                            <p class="text-muted">Chia, flax, pumpkin and more</p>
+                            <a href="login/register.php" class="btn btn-success">Shop Now</a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="category-card">
+                            <img src="B2.jpg" alt="Essential Oils">
+                            <h3>Essential Oils</h3>
+                            <p class="text-muted">Pure therapeutic oils</p>
+                            <a href="login/register.php" class="btn btn-success">Shop Now</a>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="category-card">
+                            <img src="H1.jpg" alt="Medicinal Herbs">
+                            <h3>Medicinal Herbs</h3>
+                            <p class="text-muted">Traditional remedies</p>
+                            <a href="login/register.php" class="btn btn-success">Shop Now</a>
                         </div>
                     </div>
                 <?php endif; ?>
