@@ -129,4 +129,44 @@ function check_brand_category_exists_ctr($brand_name, $cat_id, $user_id)
     $brand = new Brand();
     return $brand->brandCategoryExists($brand_name, $cat_id, $user_id);
 }
+
+/**
+ * Get ALL brands (not just for a specific user)
+ * Used for dropdowns in product management
+ * @return array|false - Array of all brands with category names or false
+ */
+function get_all_brands_ctr()
+{
+    try {
+        require_once(dirname(__FILE__) . '/../settings/db_class.php');
+        
+        $db = new db_connection();
+        if (!$db->db_connect()) {
+            error_log("get_all_brands_ctr: Database connection failed");
+            return false;
+        }
+        
+        $sql = "SELECT b.*, c.cat_name 
+                FROM brands b 
+                LEFT JOIN categories c ON b.cat_id = c.cat_id 
+                ORDER BY c.cat_name, b.brand_name";
+        
+        $result = $db->db->query($sql);
+        
+        if (!$result) {
+            error_log("get_all_brands_ctr: Query failed - " . $db->db->error);
+            return false;
+        }
+        
+        $brands = array();
+        while ($row = $result->fetch_assoc()) {
+            $brands[] = $row;
+        }
+        
+        return $brands;
+    } catch (Exception $e) {
+        error_log("get_all_brands_ctr: Exception - " . $e->getMessage());
+        return false;
+    }
+}
 ?>
