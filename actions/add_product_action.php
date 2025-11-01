@@ -31,13 +31,6 @@ try {
         exit();
     }
 
-    // Validate image upload
-    if (!isset($_FILES['product_image']) || $_FILES['product_image']['error'] !== UPLOAD_ERR_OK) {
-        $response['message'] = 'Please upload a product image';
-        echo json_encode($response);
-        exit();
-    }
-
     // Get form data
     $cat_id = intval($_POST['product_cat']);
     $brand_id = intval($_POST['product_brand']);
@@ -61,77 +54,103 @@ try {
         exit();
     }
 
-    // Handle image upload
-    $file = $_FILES['product_image'];
-    $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
-    $max_size = 5 * 1024 * 1024; // 5MB
-
-    // Validate file type using mime_content_type
-    $file_type = mime_content_type($file['tmp_name']);
-    if (!in_array($file_type, $allowed_types)) {
-        $response['message'] = 'Invalid file type. Only JPG, PNG, and GIF are allowed';
-        echo json_encode($response);
-        exit();
-    }
-
-    // Validate file size
-    if ($file['size'] > $max_size) {
-        $response['message'] = 'Image size must be less than 5MB';
-        echo json_encode($response);
-        exit();
-    }
-
-    // Step 1: Insert product with temporary image path
-    $temp_image_path = 'uploads/placeholder.png';
+    // ⭐ CHANGED: Image is now OPTIONAL during product creation
+    $image_path = ''; // Default to empty if no image uploaded
     
-    $product_id = add_product_ctr($cat_id, $brand_id, $title, $price, $desc, $temp_image_path, $keywords);
+    // Check if image was uploaded
+    $image_uploaded = isset($_FILES['product_image']) && 
+                     $_FILES['product_image']['error'] === UPLOAD_ERR_OK;
 
-    if (!$product_id || !is_numeric($product_id) || $product_id <= 0) {
-        $response['message'] = 'Failed to add product to database';
-        echo json_encode($response);
-        exit();
-    }
+    if ($image_uploaded) {
+        // Image was uploaded - validate and process it
+        $file = $_FILES['product_image'];
+        $allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        $max_size = 5 * 1024 * 1024; // 5MB
 
-    // Step 2: Create directory structure: uploads/u{USER_ID}/p{PRODUCT_ID}/
-    $base_upload_dir = dirname(__FILE__) . '/../uploads/';
-    $user_dir = $base_upload_dir . 'u' . $user_id . '/';
-    $product_dir = $user_dir . 'p' . $product_id . '/';
-
-    // Create directories if they don't exist
-    if (!file_exists($product_dir)) {
-        if (!mkdir($product_dir, 0755, true)) {
-            $response['message'] = 'Failed to create upload directory. Check folder permissions.';
+        // Validate file type
+        $file_type = mime_content_type($file['tmp_name']);
+        if (!in_array($file_type, $allowed_types)) {
+            $response['message'] = 'Invalid file type. Only JPG, PNG, GIF, and WEBP are allowed';
             echo json_encode($response);
             exit();
         }
+
+        // Validate file size
+        if ($file['size'] > $max_size) {
+            $response['message'] = 'Image size must be less than 5MB';
+            echo json_encode($response);
+            exit();
+        }
+
+        // Step 1: Add product first to get product_id
+        $temp_image_path = '';
+        $product_id = add_product_ctr($cat_id, $brand_id, $title, $price, $desc, $temp_image_path, $keywords);
+
+        if (!$product_id || !is_numeric($product_id) || $product_id <= 0) {
+            $response['message'] = 'Failed to add product to database';
+            echo json_encode($response);
+            exit();
+        }
+
+        // Step 2: Upload the image
+        $base_upload_dir = dirname(__FILE__) . '/../uploads/';
+        
+        // Create uploads directory if it doesn't exist
+        if (!file_exists($base_upload_dir)) {
+            if (!mkdir($base_upload_dir, 0755, true)) {
+                $response['message'] = 'Failed to create upload directory';
+                echo json_encode($response);
+                exit();
+            }
+        }
+
+        // Generate unique filename
+        $file_extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+        $filename = 'product_' . $product_id . '_' . time() . '_' . uniqid() . '.' . $file_extension;
+        $file_path = $base_upload_dir . $filename;
+
+        // Move uploaded file
+        if (!move_uploaded_file($file['tmp_name'], $file_path)) {
+            $response['message'] = 'Product added but failed to upload image';
+            $response['success'] = true; // Product was still added
+            $response['product_id'] = $product_id;
+            echo json_encode($response);
+            exit();
+        }
+
+        // Step 3: Update product with image path
+        $image_path = 'uploads/' . $filename;
+        
+        if (!update_product_image_ctr($product_id, $image_path)) {
+            $response['message'] = 'Product added but failed to update image path';
+            $response['success'] = true;
+            $response['product_id'] = $product_id;
+            echo json_encode($response);
+            exit();
+        }
+
+        // Success with image!
+        $response['success'] = true;
+        $response['message'] = 'Product added successfully with image!';
+        $response['product_id'] = $product_id;
+        $response['image_path'] = $image_path;
+
+    } else {
+        // ⭐ No image uploaded - just add product without image
+        $image_path = '';
+        $product_id = add_product_ctr($cat_id, $brand_id, $title, $price, $desc, $image_path, $keywords);
+
+        if (!$product_id || !is_numeric($product_id) || $product_id <= 0) {
+            $response['message'] = 'Failed to add product to database';
+            echo json_encode($response);
+            exit();
+        }
+
+        // Success without image!
+        $response['success'] = true;
+        $response['message'] = 'Product added successfully! You can upload an image by editing the product.';
+        $response['product_id'] = $product_id;
     }
-
-    // Step 3: Generate unique filename and upload
-    $file_extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-    $filename = 'product_' . $product_id . '_' . time() . '.' . $file_extension;
-    $file_path = $product_dir . $filename;
-
-    // Move uploaded file
-    if (!move_uploaded_file($file['tmp_name'], $file_path)) {
-        $response['message'] = 'Failed to upload image file';
-        echo json_encode($response);
-        exit();
-    }
-
-    // Step 4: Update product with actual image path (relative path for database)
-    $relative_path = 'uploads/u' . $user_id . '/p' . $product_id . '/' . $filename;
-    
-    if (!update_product_ctr($product_id, $cat_id, $brand_id, $title, $price, $desc, $relative_path, $keywords)) {
-        $response['message'] = 'Product added but failed to update image path';
-        echo json_encode($response);
-        exit();
-    }
-
-    // Success!
-    $response['success'] = true;
-    $response['message'] = 'Product added successfully!';
-    $response['product_id'] = $product_id;
-    $response['image_path'] = $relative_path;
 
 } catch (Exception $e) {
     $response['message'] = 'An error occurred: ' . $e->getMessage();
