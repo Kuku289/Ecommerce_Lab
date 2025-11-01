@@ -4,11 +4,19 @@ require_once(dirname(__FILE__) . '/../settings/db_class.php');
 class Product extends db_connection {
     
     // Add a new product
-    public function add_product($category_id, $brand_id, $title, $price, $description, $image, $keywords) {
-        $sql = "INSERT INTO products (product_cat, product_brand, product_title, product_price, product_desc, product_image, product_keywords) 
-                VALUES ('$category_id', '$brand_id', '$title', '$price', '$description', '$image', '$keywords')";
-        return $this->db_query($sql);
+public function add_product($category_id, $brand_id, $title, $price, $description, $image, $keywords) {
+    $sql = "INSERT INTO products (product_cat, product_brand, product_title, product_price, product_desc, product_image, product_keywords) 
+            VALUES ('$category_id', '$brand_id', '$title', '$price', '$description', '$image', '$keywords')";
+    
+    $result = $this->db_query($sql);
+    
+    // ⭐ CHANGED: Return the new product_id instead of just true/false
+    if ($result) {
+        return $this->db_conn()->insert_id; // Returns the ID of the newly inserted product
     }
+    
+    return false;
+}
     
     // Get all products
     public function get_all_products() {
