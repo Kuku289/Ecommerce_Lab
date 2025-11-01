@@ -147,20 +147,27 @@ function deleteProduct(productId) {
     });
 }
 
-// Upload product image
+// ⭐ UPDATED: Upload product image function
 function uploadProductImage(productId) {
     const fileInput = document.getElementById('product_image_file');
     const file = fileInput.files[0];
 
+    // Validate file selection
     if (!file) {
-        showMessage('Please select an image to upload', 'error');
+        showMessage('Please select an image file first', 'error');
+        return;
+    }
+
+    // Validate product ID
+    if (!productId || productId == 0) {
+        showMessage('Please save the product first before uploading an image', 'error');
         return;
     }
 
     // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
-        showMessage('Only JPG, PNG, and GIF images are allowed', 'error');
+        showMessage('Invalid file type. Only JPG, PNG, GIF, and WEBP images are allowed', 'error');
         return;
     }
 
@@ -171,10 +178,18 @@ function uploadProductImage(productId) {
         return;
     }
 
+    // Create FormData
     const formData = new FormData();
     formData.append('product_image', file);
     formData.append('product_id', productId);
 
+    // Show loading state
+    const uploadBtn = event.target;
+    const originalText = uploadBtn.innerHTML;
+    uploadBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+    uploadBtn.disabled = true;
+
+    // Send AJAX request
     fetch('../actions/upload_product_image_action.php', {
         method: 'POST',
         body: formData
@@ -183,10 +198,15 @@ function uploadProductImage(productId) {
     .then(data => {
         if (data.success) {
             showMessage(data.message, 'success');
-            // Set the image path in the hidden input
+            
+            // Update hidden input
             document.getElementById('product_image').value = data.image_path;
-            // Display preview
-            displayImagePreview(data.image_path);
+            
+            // Display preview with success styling
+            displayImagePreview(data.image_path, true);
+            
+            // Reload products table
+            loadProducts();
         } else {
             showMessage(data.message, 'error');
         }
@@ -194,14 +214,34 @@ function uploadProductImage(productId) {
     .catch(error => {
         console.error('Error:', error);
         showMessage('An error occurred while uploading the image', 'error');
+    })
+    .finally(() => {
+        // Restore button state
+        uploadBtn.innerHTML = originalText;
+        uploadBtn.disabled = false;
     });
 }
 
-// Display image preview
-function displayImagePreview(imagePath) {
+// ⭐ UPDATED: Display image preview
+function displayImagePreview(imagePath, isUploaded = false) {
     const preview = document.getElementById('imagePreview');
     if (preview) {
-        preview.innerHTML = `<img src="../${imagePath}" alt="Product Image" style="max-width: 200px; max-height: 200px; margin-top: 10px; border-radius: 5px; border: 2px solid #dee2e6;">`;
+        if (isUploaded) {
+            // Show with success message if just uploaded
+            preview.innerHTML = `
+                <div class="mt-2">
+                    <p class="text-success"><i class="fas fa-check-circle"></i> Image uploaded successfully!</p>
+                    <img src="../${imagePath}" alt="Product Image" 
+                         style="max-width: 200px; border-radius: 5px; border: 2px solid #28a745;">
+                </div>
+            `;
+        } else {
+            // Show normal preview for existing images
+            preview.innerHTML = `
+                <img src="../${imagePath}" alt="Product Image" 
+                     style="max-width: 200px; max-height: 200px; margin-top: 10px; border-radius: 5px; border: 2px solid #dee2e6;">
+            `;
+        }
     }
 }
 
@@ -231,7 +271,7 @@ function displayProducts(products) {
     tbody.innerHTML = '';
 
     if (products.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center">No products found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No products found</td></tr>';
         return;
     }
 
@@ -347,9 +387,34 @@ function showMessage(message, type) {
     }
 }
 
+// ⭐ NEW: Preview image when file is selected (before upload)
+function previewSelectedImage(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('imagePreview');
+            preview.innerHTML = `
+                <div class="mt-2">
+                    <p class="text-muted"><small>Preview (not yet uploaded):</small></p>
+                    <img src="${e.target.result}" alt="Preview" 
+                         style="max-width: 200px; border-radius: 5px; border: 2px solid #dee2e6;">
+                </div>
+            `;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
 // Load products on page load
 document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('productsTableBody')) {
         loadProducts();
+    }
+    
+    // Add event listener for file input preview
+    const fileInput = document.getElementById('product_image_file');
+    if (fileInput) {
+        fileInput.addEventListener('change', previewSelectedImage);
     }
 });

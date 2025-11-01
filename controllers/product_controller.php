@@ -42,4 +42,11 @@ function get_products_by_brand_ctr($brand_id) {
     $product = new Product();
     return $product->get_products_by_brand($brand_id);
 }
+
+// ⭐ ADD THIS NEW FUNCTION HERE ⭐
+// Update product image controller
+function update_product_image_ctr($product_id, $image_path) {
+    $product = new Product();
+    return $product->update_product_image($product_id, $image_path);
+}
 ?>

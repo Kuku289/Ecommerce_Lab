@@ -71,5 +71,12 @@ class Product extends db_connection {
                 ORDER BY p.product_id DESC";
         return $this->db_fetch_all($sql);
     }
+    
+    // ⭐ ADD THIS NEW METHOD HERE ⭐
+    // Update product image
+    public function update_product_image($product_id, $image_path) {
+        $sql = "UPDATE products SET product_image = '$image_path' WHERE product_id = '$product_id'";
+        return $this->db_query($sql);
+    }
 }
 ?>
