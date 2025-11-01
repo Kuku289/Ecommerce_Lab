@@ -1,50 +1,45 @@
 <?php
-session_start();
-require_once(dirname(__FILE__) . '../controllers/product_controller.php');
+require_once(dirname(__FILE__) . '/../classes/product_class.php');
 
-header('Content-Type: application/json');
-
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
-    echo json_encode(['success' => false, 'message' => 'User not logged in']);
-    exit();
+// Add product controller
+function add_product_ctr($category_id, $brand_id, $title, $price, $description, $image, $keywords) {
+    $product = new Product();
+    return $product->add_product($category_id, $brand_id, $title, $price, $description, $image, $keywords);
 }
 
-// Check if user is admin (adjust based on your design)
-if (!isset($_SESSION['user_role']) || $_SESSION['user_role'] != 1) {
-    echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
-    exit();
+// Get all products controller
+function get_all_products_ctr() {
+    $product = new Product();
+    return $product->get_all_products();
 }
 
-// Validate required fields
-if (empty($_POST['product_cat']) || empty($_POST['product_brand']) || 
-    empty($_POST['product_title']) || empty($_POST['product_price']) || 
-    empty($_POST['product_desc']) || empty($_POST['product_keywords'])) {
-    echo json_encode(['success' => false, 'message' => 'All fields are required']);
-    exit();
+// Get single product controller
+function get_product_by_id_ctr($product_id) {
+    $product = new Product();
+    return $product->get_product_by_id($product_id);
 }
 
-// Get form data
-$category_id = intval($_POST['product_cat']);
-$brand_id = intval($_POST['product_brand']);
-$title = trim($_POST['product_title']);
-$price = floatval($_POST['product_price']);
-$description = trim($_POST['product_desc']);
-$keywords = trim($_POST['product_keywords']);
-$image = isset($_POST['product_image']) ? trim($_POST['product_image']) : '';
-
-// Validate price
-if ($price <= 0) {
-    echo json_encode(['success' => false, 'message' => 'Price must be greater than 0']);
-    exit();
+// Update product controller
+function update_product_ctr($product_id, $category_id, $brand_id, $title, $price, $description, $image, $keywords) {
+    $product = new Product();
+    return $product->update_product($product_id, $category_id, $brand_id, $title, $price, $description, $image, $keywords);
 }
 
-// Add product
-$result = add_product_ctr($category_id, $brand_id, $title, $price, $description, $image, $keywords);
+// Delete product controller
+function delete_product_ctr($product_id) {
+    $product = new Product();
+    return $product->delete_product($product_id);
+}
 
-if ($result) {
-    echo json_encode(['success' => true, 'message' => 'Product added successfully']);
-} else {
-    echo json_encode(['success' => false, 'message' => 'Failed to add product']);
+// Get products by category controller
+function get_products_by_category_ctr($category_id) {
+    $product = new Product();
+    return $product->get_products_by_category($category_id);
+}
+
+// Get products by brand controller
+function get_products_by_brand_ctr($brand_id) {
+    $product = new Product();
+    return $product->get_products_by_brand($brand_id);
 }
 ?>
