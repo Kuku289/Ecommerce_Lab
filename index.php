@@ -1,17 +1,20 @@
 <?php
 require_once 'settings/core.php';
 require_once 'settings/db_class.php';
+require_once 'controllers/product_controller.php';
+require_once 'controllers/category_controller.php';
+require_once 'controllers/brand_controller.php';
 
 $db = new db_connection();
 $db->db_connect();
 
-$categories = [];
-$categories_result = $db->db->query("SELECT * FROM categories LIMIT 6");
-if ($categories_result) {
-    while ($row = $categories_result->fetch_assoc()) {
-        $categories[] = $row;
-    }
-}
+// Get categories for display and filters
+$categories = get_all_categories_ctr();
+$brands = get_all_brands_ctr();
+
+// Get featured products (latest 6)
+$all_products = view_all_products_ctr();
+$featured_products = array_slice($all_products, 0, 6);
 
 $is_logged_in = check_login();
 $is_admin = $is_logged_in ? check_admin() : false;
@@ -65,6 +68,54 @@ $user_name = $is_logged_in ? get_user_name() : '';
             font-weight: bold;
             margin-bottom: 1rem;
         }
+        /* ⭐ NEW: Search Box Styles */
+        .search-container {
+            max-width: 700px;
+            margin: 30px auto;
+        }
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .search-input {
+            width: 100%;
+            padding: 15px 60px 15px 20px;
+            border: none;
+            border-radius: 50px;
+            font-size: 16px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .search-btn {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            bottom: 5px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 0 30px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .search-btn:hover {
+            background: #45a049;
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .filter-dropdown {
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+        }
         .value-card {
             text-align: center;
             padding: 2rem;
@@ -98,6 +149,53 @@ $user_name = $is_logged_in ? get_user_name() : '';
             object-fit: cover;
             border-radius: 10px;
             margin-bottom: 1rem;
+        }
+        /* ⭐ NEW: Featured Products */
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+        }
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        .product-image-container {
+            width: 100%;
+            height: 200px;
+            overflow: hidden;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .no-image {
+            color: #ccc;
+            font-size: 60px;
+        }
+        .product-body {
+            padding: 20px;
+        }
+        .product-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            min-height: 40px;
+        }
+        .product-price {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 15px;
         }
         .wellness-tip {
             background: white;
@@ -139,13 +237,14 @@ $user_name = $is_logged_in ? get_user_name() : '';
 
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container">
-            <a class="navbar-brand" href="#"><i class="fas fa-leaf"></i> BotaniQs</a>
+            <a class="navbar-brand" href="index.php"><i class="fas fa-leaf"></i> BotaniQs</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="view/all_product.php">All Products</a></li>
                     <li class="nav-item"><a class="nav-link" href="#categories">Categories</a></li>
                     <li class="nav-item"><a class="nav-link" href="#wellness">Wellness</a></li>
                     <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
@@ -160,13 +259,13 @@ $user_name = $is_logged_in ? get_user_name() : '';
                             <span class="nav-link">Welcome, <?php echo htmlspecialchars($user_name); ?></span>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-success btn-sm ms-2" href="admin/category.php">Categories</a>
+                            <a class="btn btn-success btn-sm ms-2" href="view/categories.php">Categories</a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-info btn-sm ms-2" href="admin/brand.php">Brands</a>
+                            <a class="btn btn-info btn-sm ms-2" href="view/brand.php">Brands</a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-warning btn-sm ms-2" href="admin/product.php">Products</a>
+                            <a class="btn btn-warning btn-sm ms-2" href="view/product.php">Products</a>
                         </li>
                         <li class="nav-item">
                             <a class="btn btn-outline-danger btn-sm ms-2" href="login/logout.php">Logout</a>
@@ -174,6 +273,9 @@ $user_name = $is_logged_in ? get_user_name() : '';
                     <?php else: ?>
                         <li class="nav-item">
                             <span class="nav-link">Welcome, <?php echo htmlspecialchars($user_name); ?></span>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="view/cart.php"><i class="fas fa-shopping-cart"></i> Cart</a>
                         </li>
                         <li class="nav-item">
                             <a class="btn btn-outline-danger btn-sm ms-2" href="login/logout.php">Logout</a>
@@ -188,8 +290,58 @@ $user_name = $is_logged_in ? get_user_name() : '';
         <div class="container">
             <h1>Authentic Wellness, Made Accessible</h1>
             <p>Premium organic seeds, essential oils, and herbs for Ghana's wellness journey</p>
-            <div class="d-flex gap-3 justify-content-center">
-                <a href="#categories" class="btn btn-light btn-lg">Explore Products</a>
+            
+            <!-- ⭐ NEW: Search Box -->
+            <div class="search-container">
+                <form action="view/product_search_result.php" method="GET">
+                    <div class="search-box">
+                        <input type="text" 
+                               class="search-input" 
+                               name="q" 
+                               placeholder="Search for products (e.g., 'tea tree oil', 'organic seeds')..." 
+                               required>
+                        <button type="submit" class="search-btn">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                    </div>
+                </form>
+
+                <!-- ⭐ NEW: Filter Buttons -->
+                <div class="filter-buttons">
+                    <div class="dropdown">
+                        <button class="filter-dropdown dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-tags"></i> Categories
+                        </button>
+                        <ul class="dropdown-menu">
+                            <?php foreach ($categories as $category): ?>
+                                <li>
+                                    <a class="dropdown-item" href="view/all_product.php?category=<?php echo $category['cat_id']; ?>">
+                                        <?php echo htmlspecialchars($category['cat_name']); ?>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+
+                    <div class="dropdown">
+                        <button class="filter-dropdown dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-certificate"></i> Brands
+                        </button>
+                        <ul class="dropdown-menu">
+                            <?php foreach ($brands as $brand): ?>
+                                <li>
+                                    <a class="dropdown-item" href="view/all_product.php?brand=<?php echo $brand['brand_id']; ?>">
+                                        <?php echo htmlspecialchars($brand['brand_name']); ?>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3 justify-content-center mt-4">
+                <a href="view/all_product.php" class="btn btn-light btn-lg">Explore Products</a>
                 <?php if (!$is_logged_in): ?>
                     <a href="login/register.php" class="btn btn-outline-light btn-lg">Get Started</a>
                 <?php endif; ?>
@@ -233,20 +385,65 @@ $user_name = $is_logged_in ? get_user_name() : '';
         </div>
     </section>
 
-    <section id="categories">
+    <!-- ⭐ NEW: Featured Products Section -->
+    <?php if (!empty($featured_products)): ?>
+    <section>
+        <div class="container">
+            <h2 class="section-title text-center">Featured Products</h2>
+            <p class="text-center text-muted mb-5">Check out our latest additions</p>
+            <div class="row g-4">
+                <?php foreach ($featured_products as $product): ?>
+                    <div class="col-md-6 col-lg-4">
+                        <div class="product-card">
+                            <div class="product-image-container">
+                                <?php if (!empty($product['product_image'])): ?>
+                                    <img src="<?php echo htmlspecialchars($product['product_image']); ?>" 
+                                         alt="<?php echo htmlspecialchars($product['product_title']); ?>"
+                                         class="product-image"
+                                         onerror="this.parentElement.innerHTML='<i class=\'fas fa-image no-image\'></i>'">
+                                <?php else: ?>
+                                    <i class="fas fa-image no-image"></i>
+                                <?php endif; ?>
+                            </div>
+                            <div class="product-body">
+                                <h5 class="product-title">
+                                    <?php echo htmlspecialchars($product['product_title']); ?>
+                                </h5>
+                                <div class="product-price">
+                                    GH₵<?php echo number_format($product['product_price'], 2); ?>
+                                </div>
+                                <a href="view/single_product.php?id=<?php echo $product['product_id']; ?>" 
+                                   class="btn btn-success w-100">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            <div class="text-center mt-4">
+                <a href="view/all_product.php" class="btn btn-lg btn-success">
+                    <i class="fas fa-shopping-bag"></i> View All Products
+                </a>
+            </div>
+        </div>
+    </section>
+    <?php endif; ?>
+
+    <section id="categories" class="bg-light">
         <div class="container">
             <h2 class="section-title text-center">Shop by Category</h2>
             <p class="text-center text-muted mb-5">Curated collections for your wellness journey</p>
             
             <div class="row g-4">
                 <?php if (count($categories) > 0): ?>
-                    <?php foreach ($categories as $category): ?>
+                    <?php foreach (array_slice($categories, 0, 6) as $category): ?>
                         <div class="col-md-4">
                             <div class="category-card">
                                 <i class="fas fa-spa" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
                                 <h3><?php echo htmlspecialchars($category['cat_name']); ?></h3>
                                 <p class="text-muted">Explore our premium collection</p>
-                                <a href="#" class="btn btn-success">View Products</a>
+                                <a href="view/all_product.php?category=<?php echo $category['cat_id']; ?>" class="btn btn-success">View Products</a>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -280,7 +477,7 @@ $user_name = $is_logged_in ? get_user_name() : '';
         </div>
     </section>
 
-    <section id="wellness" class="bg-light">
+    <section id="wellness">
         <div class="container">
             <h2 class="section-title text-center mb-5">Wellness Tips and Education</h2>
             <div class="row">
@@ -312,7 +509,7 @@ $user_name = $is_logged_in ? get_user_name() : '';
         </div>
     </section>
 
-    <section id="about">
+    <section id="about" class="bg-light">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-md-6">
@@ -362,6 +559,7 @@ $user_name = $is_logged_in ? get_user_name() : '';
                     <h5>Quick Links</h5>
                     <ul class="list-unstyled">
                         <li><a href="#home" class="text-white-50">Home</a></li>
+                        <li><a href="view/all_product.php" class="text-white-50">All Products</a></li>
                         <li><a href="#categories" class="text-white-50">Categories</a></li>
                         <li><a href="login/register.php" class="text-white-50">Register</a></li>
                         <li><a href="login/login.php" class="text-white-50">Login</a></li>

@@ -25,6 +25,16 @@ $(document).ready(function() {
             return;
         }
 
+        // Show loading
+        Swal.fire({
+            title: 'Logging in...',
+            text: 'Please wait',
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
+
         $.ajax({
             url: '../actions/login_user_action.php',
             type: 'POST',
@@ -32,16 +42,18 @@ $(document).ready(function() {
                 email: email,
                 password: password
             },
+            dataType: 'json',
             success: function(response) {
                 if (response.status === 'success') {
                     Swal.fire({
                         icon: 'success',
                         title: 'Success',
                         text: response.message,
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = '../index.php';
-                        }
+                        timer: 1500,
+                        showConfirmButton: false
+                    }).then(() => {
+                        // ⭐ Use redirect from server response
+                        window.location.href = response.redirect || '../index.php';
                     });
                 } else {
                     Swal.fire({
@@ -51,7 +63,8 @@ $(document).ready(function() {
                     });
                 }
             },
-            error: function() {
+            error: function(xhr, status, error) {
+                console.error('Login error:', error);
                 Swal.fire({
                     icon: 'error',
                     title: 'Oops...',

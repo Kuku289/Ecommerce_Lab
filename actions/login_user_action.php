@@ -36,8 +36,18 @@ if ($user) {
     $_SESSION['user_email'] = $user['customer_email'];
     $_SESSION['user_role'] = $user['user_role'];
     
+    // ⭐ CHANGED: Determine redirect based on role
+    if ($user['user_role'] == 1) {
+        // Admin - redirect to admin product management
+        $redirect_url = '../admin/product.php';
+    } else {
+        // Regular user - redirect to shopping
+        $redirect_url = '../view/all_product.php';
+    }
+    
     $response['status'] = 'success';
     $response['message'] = 'Login successful';
+    $response['redirect'] = $redirect_url; // ⭐ ADDED: Redirect URL
     $response['user'] = array(
         'id' => $user['customer_id'],
         'name' => $user['customer_name'],
