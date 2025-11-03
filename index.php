@@ -259,13 +259,13 @@ $user_name = $is_logged_in ? get_user_name() : '';
                             <span class="nav-link">Welcome, <?php echo htmlspecialchars($user_name); ?></span>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-success btn-sm ms-2" href="view/categories.php">Categories</a>
+                            <a class="btn btn-success btn-sm ms-2" href="admin/categories.php">Categories</a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-info btn-sm ms-2" href="view/brand.php">Brands</a>
+                            <a class="btn btn-info btn-sm ms-2" href="admin/brand.php">Brands</a>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-warning btn-sm ms-2" href="view/product.php">Products</a>
+                            <a class="btn btn-warning btn-sm ms-2" href="admin/product.php">Products</a>
                         </li>
                         <li class="nav-item">
                             <a class="btn btn-outline-danger btn-sm ms-2" href="login/logout.php">Logout</a>
