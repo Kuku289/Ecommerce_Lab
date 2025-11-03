@@ -4,7 +4,7 @@
  * File: classes/brand_class.php
  */
 
-require_once '../settings/db_class.php';
+require_once(dirname(__FILE__) . '/../settings/db_class.php');
 
 class Brand extends db_connection
 {
