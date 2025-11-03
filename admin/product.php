@@ -1,5 +1,5 @@
 <?php
-require_once '../settings/core.php';
+require_once(dirname(__FILE__) . '/../settings/core.php');
 
 // Check if user is logged in and is admin
 if (!check_login()) {
