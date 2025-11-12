@@ -62,7 +62,7 @@ $is_logged_in = isset($_SESSION['user_id']);
             color: white !important;
         }
         .hero-section {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea 0%, #D19C97 100%);
             color: white;
             padding: 80px 0 40px 0;
             margin-top: 56px;
