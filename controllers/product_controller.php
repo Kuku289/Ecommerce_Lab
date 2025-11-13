@@ -86,4 +86,9 @@ function update_product_image_ctr($product_id, $image_path) {
     $product = new Product();
     return $product->update_product_image($product_id, $image_path);
 }
+// View all products (alias for get_all_products_ctr)
+function view_all_products_ctr() {
+    return get_all_products_ctr();
+}
+
 ?>

@@ -13,7 +13,7 @@ $categories = get_all_categories_ctr();
 $brands = get_all_brands_ctr();
 
 // Get featured products (latest 6)
-$all_products = view_all_products_ctr();
+$all_products = get_all_products_ctr(); // CHANGED THIS LINE
 $featured_products = array_slice($all_products, 0, 6);
 
 $is_logged_in = check_login();
