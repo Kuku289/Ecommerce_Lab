@@ -4,6 +4,7 @@ session_start();
 
 // Include necessary files
 require_once('../controllers/product_controller.php');
+include('../includes/chatbot_widget.php');
 
 // Get product ID from URL
 $product_id = isset($_GET['id']) ? intval($_GET['id']) : 0;

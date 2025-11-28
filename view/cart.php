@@ -8,6 +8,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 require_once('../controllers/cart_controller.php');
+include('../includes/chatbot_widget.php');
 
 $customer_id = $_SESSION['user_id'];
 $cart_items = get_cart_items_ctr($customer_id);

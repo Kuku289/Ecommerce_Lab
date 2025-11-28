@@ -6,6 +6,7 @@ session_start();
 require_once('../controllers/product_controller.php');
 require_once('../controllers/category_controller.php');
 require_once('../controllers/brand_controller.php');
+include('../includes/chatbot_widget.php');
 
 // Get search query
 $search_query = isset($_GET['q']) ? trim($_GET['q']) : '';

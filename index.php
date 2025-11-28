@@ -4,6 +4,7 @@ require_once 'settings/db_class.php';
 require_once 'controllers/product_controller.php';
 require_once 'controllers/category_controller.php';
 require_once 'controllers/brand_controller.php';
+include('../includes/chatbot_widget.php'); 
 
 $db = new db_connection();
 $db->db_connect();
@@ -232,6 +233,7 @@ $user_name = $is_logged_in ? get_user_name() : '';
         }
     </style>
 </head>
+
 <body>
     <div class="page-background"></div>
 

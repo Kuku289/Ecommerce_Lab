@@ -6,10 +6,22 @@
 // define('DB_USER', 'root');
 // define('DB_PASS', '');
 // define('DB_NAME', 'dbforlab');
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "shoppn";
+if (!defined("SERVER")) {
+    define("SERVER", "localhost");
+}
+
+if (!defined("USERNAME")) {
+    define("USERNAME", "tracey.lartey");
+}
+
+if (!defined("PASSWD")) {
+    define("PASSWD", "Kukulala28");
+}
+
+if (!defined("DATABASE")) {
+    define("DATABASE", "ecommerce_2025A_tracey_lartey");
+}
+?>
 
 
 if (!defined("SERVER")) {

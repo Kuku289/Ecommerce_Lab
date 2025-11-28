@@ -275,6 +275,14 @@ ALTER TABLE `products`
   ADD CONSTRAINT `products_ibfk_1` FOREIGN KEY (`product_cat`) REFERENCES `categories` (`cat_id`),
   ADD CONSTRAINT `products_ibfk_2` FOREIGN KEY (`product_brand`) REFERENCES `brands` (`brand_id`);
 COMMIT;
+ALTER TABLE payment 
+ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50) COMMENT 'Payment method: paystack, cash, bank_transfer, etc.',
+ADD COLUMN IF NOT EXISTS transaction_ref VARCHAR(100) COMMENT 'Paystack transaction reference',
+ADD COLUMN IF NOT EXISTS authorization_code VARCHAR(100) COMMENT 'Authorization code from payment gateway',
+ADD COLUMN IF NOT EXISTS payment_channel VARCHAR(50) COMMENT 'Payment channel: card, mobile_money, etc.';
+
+ALTER TABLE payment ADD INDEX idx_transaction_ref (transaction_ref);
+ALTER TABLE payment ADD INDEX idx_payment_method (payment_method);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

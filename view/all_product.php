@@ -6,6 +6,7 @@ session_start();
 require_once('../controllers/product_controller.php');
 require_once('../controllers/category_controller.php');
 require_once('../controllers/brand_controller.php');
+include('../includes/chatbot_widget.php');
 
 // Get all categories and brands for filters
 $categories = get_all_categories_ctr();

@@ -1,6 +1,6 @@
 <?php
 
-require_once dirname(__FILE__) . '/../classes/user_class.php';
+require_once(dirname(__FILE__) . '/../classes/user_class.php');
 
 function register_user_ctr($name, $email, $password, $phone_number, $role, $country = null, $city = null)
 {
